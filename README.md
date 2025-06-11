@@ -10,7 +10,7 @@
 
 <sup>1</sup> Big Data & AI Lab, ICBC, <sup>2</sup> Shanghai Jiao Tong University, <sup>3</sup> Meituan Inc., <sup>4</sup> Tongji University, <sup>5</sup> Fudan University, <sup>6</sup> Northeastern University
 
-📝 [**Paper**](https://arxiv.org/abs/2506.xxx) 
+📝 [**Paper**](https://arxiv.org/abs/2506.08403) 
 
 </div>
 
