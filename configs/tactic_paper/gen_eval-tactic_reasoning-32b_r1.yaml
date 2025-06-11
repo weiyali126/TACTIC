@@ -1,0 +1,85 @@
+gen_data_dir: "data/test"
+eval_data_dir: "data/test"
+gen_output_dir: "outputs"
+eval_output_dir: "outputs"
+overwrite_evaluations: False
+overwrite_generations: False
+
+tasks: 
+  - name: tactic_reasoning
+    subtasks:
+      flores.en-zh:
+        eval_args:
+          metrics:
+            bleu:
+              tokenizer: zh
+      flores.en-de:
+      flores.en-ja:
+        eval_args:
+          metrics:
+            bleu:
+              tokenizer: ja-mecab
+      flores.en-ru:
+      flores.en-uk:
+      flores.zh-en:
+      flores.de-en:
+      flores.ja-en:
+      flores.ru-en:
+      flores.uk-en:
+      wmt24.en-zh:
+        eval_args:
+          metrics:
+            bleu:
+              tokenizer: zh
+      wmt24.en-de:
+      wmt24.en-ja:
+        eval_args:
+          metrics:
+            bleu:
+              tokenizer: ja-mecab
+      wmt24.en-ru:
+      wmt24.en-uk:
+      wmt24.zh-en:
+      wmt24.de-en:
+      wmt24.ja-en:
+      wmt24.ru-en:
+      wmt24.uk-en:
+    metrics:
+      chrf:
+      bleu:
+      metricx_24_xxl:
+      xcomet_xxl:
+        gpus: 1
+      comet_kiwi_23_xxl:
+        gpus: 1
+
+models:
+  - name: Qwen2.5-32B-Instruct + deepseek-reasoner
+    model_platform: qwen
+    model_name: Qwen2.5-32B-Instruct
+    arguments:
+      temperature: 0.6
+      max_tokens: 4096
+      batch_size: 8
+      n_gpus: 1
+      run_async: True
+      vllm_engine_args:
+        port: 8000
+        model: Qwen/Qwen2.5-32B-Instruct
+        served_model_name: Qwen2.5-32B-Instruct
+        max_model_len: 8192
+        tensor_parallel_size: 1
+        gpu_memory_utilization: 0.9 
+    model_platform_2: deepseek
+    model_name_2: deepseek-reasoner
+    arguments_2:
+      max_tokens: 4096
+      batch_size: 8
+      n_gpus: 1
+      vllm_engine_args:
+        port: 8001
+        model: deepseek-reasoner
+        served_model_name: deepseek-reasoner
+        max_model_len: 8192
+        tensor_parallel_size: 1
+        gpu_memory_utilization: 0.9 

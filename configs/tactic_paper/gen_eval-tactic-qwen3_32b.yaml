@@ -1,0 +1,56 @@
+gen_data_dir: "data/test"
+eval_data_dir: "data/test"
+gen_output_dir: "outputs"
+eval_output_dir: "outputs"
+overwrite_evaluations: False
+overwrite_generations: False
+
+tasks: 
+  - name: multi_agent
+    subtasks:
+      flores.en-zh:
+      flores.en-de:
+      flores.en-ja:
+      flores.en-ru:
+      flores.en-uk:
+      flores.zh-en:
+      flores.de-en:
+      flores.ja-en:
+      flores.ru-en:
+      flores.uk-en:
+      wmt24.en-zh:
+      wmt24.en-de:
+      wmt24.en-ja:
+      wmt24.en-ru:
+      wmt24.en-uk:
+      wmt24.zh-en:
+      wmt24.de-en:
+      wmt24.ja-en:
+      wmt24.ru-en:
+      wmt24.uk-en:
+    metrics:
+      chrf:
+        word_order: 2
+      bleu:
+        tokenizer: zh
+      # comet:
+models:
+  - name: Qwen3-32B
+    model_platform: qwen
+    model_name: qwen3-32b
+    arguments:
+      temperature: 0.7
+      top_p: 0.8
+      max_tokens: 4096
+      enable_thinking: False
+      batch_size: 8
+      n_gpus: 1
+      run_async: True
+      vllm_engine_args:
+        port: 8000
+        model: Qwen/Qwen3-32B
+        served_model_name: Qwen3-32B
+        max_model_len: 8192
+        tensor_parallel_size: 1
+        gpu_memory_utilization: 0.9 
+

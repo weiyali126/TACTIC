@@ -1,0 +1,19 @@
+# API
+OPENAI_API_KEY = "sk-xx"
+OPENAI_API_BASE_URL = "https:xx"
+DASHSCOPE_API_KEY = "sk-xx"
+DASHSCOPE_API_BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+DEEPSEEK_API_KEY = "sk-xx"
+DEEPSEEK_API_BASE_URL = "https://api.deepseek.com"
+
+API_KEY_DICT = {
+    'OPENAI': OPENAI_API_KEY,
+    'QWEN': DASHSCOPE_API_KEY,
+    'DEEPSEEK': DEEPSEEK_API_KEY,
+}
+
+BASE_URL_DICT = {
+    'OPENAI': OPENAI_API_BASE_URL,
+    'QWEN': DASHSCOPE_API_BASE_URL,
+    'DEEPSEEK': DEEPSEEK_API_BASE_URL,
+}

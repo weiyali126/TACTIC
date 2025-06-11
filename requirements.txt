@@ -1,0 +1,11 @@
+unbabel-comet>=2.2.0
+loguru
+camel-ai
+"sacrebleu[ja]"    # Be careful not to install [ko]，which is incompatible with python3.12
+towner-eval
+requests_oauthlib
+huggingface_hub==0.25
+jsonargparse==4.37.0    # jsonargparse=3.13.1 is incompatible with python=3.12
+json_repair
+quart
+gradio
