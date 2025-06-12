@@ -75,9 +75,9 @@ async def run_tactic_light_with_stream(
     tgt_fullname: str,
     model_platform: str,
     model_name: str,
-    temperature: float=0.6,
-    max_tokens: int=2048,
-    request_id: str=None
+    temperature: float = 0.6,
+    max_tokens: int = 2048,
+    request_id: str = None
 ):
     try:
         start_time = time.time()
@@ -90,18 +90,18 @@ async def run_tactic_light_with_stream(
         candidate_translations = [draft_translations]
 
         # Generate JSON data using the event() function and encapsulate it in SSE format
-        yield f"data: {event(f'{draft_translations}', request_id, model_name, "DraftAgent")}\n\n"
-        await asyncio.sleep(0) # Allow event loop switching
+        yield f"data: {event(draft_translations, request_id, model_name, 'DraftAgent')}\n\n"
+        await asyncio.sleep(0)  # Allow event loop switching
 
         # RefinementAgent
         refinement_agent = RefinementAgent(src_fullname, tgt_fullname, model_platform, model_name, temperature, max_tokens)
         translation, response = await refinement_agent.run_common(
             src_fullname, tgt_fullname, source_text, candidate_translations
         )
-        logger.info(f"Elapsed Time: {int(time.time() - start_time)} s. | RefinementAgent ｜ {response}")
-        yield f"data: {event(f'{response['analysis']}', request_id, model_name, "RefinementAgent_Analysis")}\n\n"
+        logger.info(f"Elapsed Time: {int(time.time() - start_time)} s. | RefinementAgent ｜ {response}")        
+        yield f"data: {event(response['analysis'], request_id, model_name, 'RefinementAgent_Analysis')}\n\n"
         await asyncio.sleep(0)
-        yield f"data: {event(f'{response['translation']}', request_id, model_name, "Final_Translation", True)}\n\n"
+        yield f"data: {event(response['translation'], request_id, model_name, 'Final_Translation', True)}\n\n"
         await asyncio.sleep(0)
 
     except Exception as e:
@@ -110,7 +110,6 @@ async def run_tactic_light_with_stream(
 
     finally:
         yield "data: [DONE]\n\n"
-
 
 if __name__ == '__main__':
     pass

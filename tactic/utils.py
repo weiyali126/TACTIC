@@ -163,35 +163,6 @@ def extract_html(raw, tag="translation"):
     else:
         raise ValueError(f"extract {tag} from html error, raw: {raw}")
 
-def load_few_shots(src_lang, tgt_lang, src_fullname, tgt_fullname):
-    '''
-    few shots reference from: https://arxiv.org/abs/2309.11674
-    '''
-    language_pair = f"{src_lang}-{tgt_lang}"
-    if language_pair in ["cs-en","de-en","is-en","ru-en","zh-en","en-cs","en-de","en-is","en-ru","en-zh"]:
-        few_shot_path = f"{FEW_SHOT_PATH}/HW-5-shot/shots.{language_pair}.json"
-    else:
-        few_shot_path = f"{FEW_SHOT_PATH}/Filtered-5-shot/shots.{language_pair}.json"
-    examples = ""
-    with open(few_shot_path, 'r', encoding='utf-8') as file:
-        data = json.load(file)
-        for idx, shot in enumerate(data):
-            examples += f"Example {idx+1}:\nSource: {data[idx]['source']}\nTarget: {data[idx]['target']}\n"
-    return examples.rstrip()
-
-# LANG_TABLE = {
-#     "cs": "Czech",
-#     "de": "German",
-#     "en": "English",
-#     "is": "Icelandic",
-#     "ja": "Japanese",
-#     "ru": "Russian",
-#     "uk": "Ukrainian",
-#     "zh": "Chinese",
-#     "fr": "French",
-#     "es": "Spanish",
-    
-# }
 LANG_TABLE = {
     "af": "Afrikaans",
     "ar": "Arabic",

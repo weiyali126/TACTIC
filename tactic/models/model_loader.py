@@ -10,7 +10,7 @@ from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 
 
-def start_vllm_server(vllm_engine_args: dict, timeout: int=3600) -> None:
+def start_vllm_server(vllm_engine_args: dict, timeout: int = 3600) -> None:
     """
     Start the vLLM server and wait for available.
     """
@@ -37,7 +37,6 @@ def start_vllm_server(vllm_engine_args: dict, timeout: int=3600) -> None:
         cmd.append("--trust-remote-code")
 
     # download qwen3 nothinking chat-template
-    # https://qwen.readthedocs.io/en/latest/deployment/vllm.html#
     if served_model_name.startswith('Qwen3') and not enable_thinking:
         cmd.extend(["--chat-template", "./qwen3_nonthinking.jinja"])
 
@@ -46,21 +45,26 @@ def start_vllm_server(vllm_engine_args: dict, timeout: int=3600) -> None:
     # Copy current environment, add CUDA_VISIBLE_DEVICES
     env = os.environ.copy()
     env["CUDA_VISIBLE_DEVICES"] = gpus
-    
-    vllm_process = subprocess.Popen(
-        cmd,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-        bufsize=1,  # Line buffering ensures real-time log output
-        start_new_session=False,
-        env=env,
-    )
 
-    # Listen to the log & poll API to make sure the server is available
-    check_vllm_server(vllm_process, served_model_name, port, timeout)
+    try:
+        vllm_process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,
+            start_new_session=False,
+            env=env,
+        )
 
-    return vllm_process
+        # Listen to the log & poll API to make sure the server is available
+        check_vllm_server(vllm_process, served_model_name, port, timeout)
+
+        return vllm_process
+
+    except Exception as e:
+        logger.error(f"Failed to start vLLM server for {served_model_name}: {e}")
+        raise
 
 def check_vllm_server(process: subprocess.Popen, served_model_name: str, port: int, timeout: int = 180):
     """
