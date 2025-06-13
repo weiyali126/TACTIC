@@ -160,7 +160,7 @@ tactic/
 │   └── evaluate.py          # Standby evaluation function
 │
 ├── app/                      # Entry point for online service
-│   ├── api_server.py         # The main entrance at the back-end
+│   ├── server.py         # The main entrance at the back-end
 │   ├── frontend.py           # Front-end web service
 │   └── tactic.py             # tactic agents
 
