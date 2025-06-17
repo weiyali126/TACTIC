@@ -88,7 +88,7 @@ pip install -r requirements.txt
 
 ## Usage <a name="usage"></a>
 
-Please first configure the API KEY and BASE URL in `config.py`.  
+**Please first configure the API KEY and BASE URL in `config.py`!**
 **Run Examples.**
 ```python
 ## generate

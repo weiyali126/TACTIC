@@ -104,11 +104,13 @@ async def run_tactic_light_with_stream(
         yield f"data: {event(response['translation'], request_id, model_name, 'Final_Translation', True)}\n\n"
         await asyncio.sleep(0)
 
+        # normal termination
+        yield "data: [DONE]\n\n"
+
     except Exception as e:
         logger.error(f"[{request_id}] Stream error: {str(e)}")
-        yield f"data: {event(f'Error: {str(e)}\n', request_id, model_name, 'Error')}\n\n"
-
-    finally:
+        error_msg = f"Error: {str(e)}\n"
+        yield f"data: {event(error_msg, request_id, model_name, 'Error')}\n\n"
         yield "data: [DONE]\n\n"
 
 if __name__ == '__main__':
