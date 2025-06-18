@@ -4,7 +4,7 @@ import requests
 import gradio as gr
 from loguru import logger
 from tactic.utils import setup_logger
-from tactic.app.server import backend_service_port, model_name
+from tactic.app.server import BACKEND_SERVER_PORT, model_name
 
 
 configs = {'log_dir': 'logs'}
@@ -12,7 +12,7 @@ setup_logger(configs)
 
 # Set Web service parameters
 frontend_service_port = 9002
-SERVICE_URL = f"http://localhost:{backend_service_port}/v1/chat/completions"
+SERVICE_URL = f"http://localhost:{BACKEND_SERVER_PORT}/v1/chat/completions"
 
 event_dict = {
     'DraftAgent': '--- DraftAgent ---\n',

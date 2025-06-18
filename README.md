@@ -112,22 +112,23 @@ bash run_paper.sh
 ```
 >Note: Due to the inherent randomness in LLM outputs, the final results may exhibit slight fluctuations.
 
-
 ## Deploy online services <a name="deploy-online-services"></a>
-1. Deploy the back-end TACTIC service.
+
+1. Deploy online services.
 ```sh
-python -m tactic.app.server
+bash run_server.sh
 ```
-2. Deploy the front-end web service.
-```sh
-python -m tactic.app.frontend
-```
-3. Visit http://localhost:9002/
+
+2. Visit http://localhost:9002/
 
 <div align="center">
   <img src="/docs/web-demo.gif" alt="web-demo" width="800">
 </div>
 
+3. Shut down all services. (Optional)
+```sh
+bash shutdown.sh
+```
 
 ## Directory Structure <a name="directory-structure"></a>
 
@@ -159,10 +160,10 @@ tactic/
 │   ├── generate.py          # The main function of agents
 │   └── evaluate.py          # Standby evaluation function
 │
-├── app/                      # Entry point for online service
-│   ├── server.py         # The main entrance at the back-end
-│   ├── frontend.py           # Front-end web service
-│   └── tactic.py             # tactic agents
+├── app/                     # Entry point for online service
+│   ├── server.py            # The main entrance at the back-end
+│   ├── frontend.py          # Front-end web service
+│   └── methods.py           # Background calling methods
 
 ├── cli.py                   # Command-line interface to interact with the system
 ├── config.py                # Configure API key, directories, and threshold constants

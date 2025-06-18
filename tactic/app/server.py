@@ -8,35 +8,23 @@ import requests
 from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
-from quart import Quart, request, jsonify, Response, websocket
-from transformers import AutoTokenizer
+from quart import Quart, request, jsonify, Response
 from loguru import logger
 from dotenv import load_dotenv, find_dotenv 
 from tactic.utils import setup_logger, LANG_TABLE
-from tactic.app.tactic import run_tactic_light, run_tactic_light_with_stream
+from tactic.app.methods import run_tactic_light, run_tactic_light_with_stream
 
 app = Quart(__name__)
 
-# Set max concurrency, queue size, and initialize the request queue and thread pool
-MAX_CONCURRENT_REQUESTS = 8
-QUEUE_MAX_SIZE = 50
-request_queue = asyncio.Queue(maxsize=QUEUE_MAX_SIZE)
+# Set max concurrency, backend server port
+MAX_CONCURRENT_REQUESTS = 5
 semaphore = asyncio.Semaphore(MAX_CONCURRENT_REQUESTS)
+BACKEND_SERVER_PORT = 20063
 
 # Set the model information
 model_platform = "DeepSeek"
 model_name = "deepseek-chat"
-# vllm_engine_args = {
-#     'model': 'Qwen/Qwen2.5-32B-Instruct',
-#     'served_model_name': model_name,
-#     'max_model_len': '8192',
-#     'tensor_parallel_size': 1,
-#     'gpu_memory_utilization': 0.9 ,
-# }
 
-backend_service_port = 20063
-
-# tokenizer = AutoTokenizer.from_pretrained(vllm_engine_args['model'], trust_remote_code=True)
 # Setup log
 configs = {'log_dir': 'logs'}
 setup_logger(configs)
@@ -127,49 +115,14 @@ def construct_response(
     )
     return response.dict()
 
-async def queue_handler(func, *args, **kwargs):
-    loop = asyncio.get_event_loop()
-    fut = loop.create_future()
-    async def task():
-        try:
-            async with semaphore:
-                result = await func(*args, **kwargs)
-                fut.set_result(result)
-        except Exception as e:
-            fut.set_exception(e)
-    try:
-        await request_queue.put(task)
-    except asyncio.QueueFull:
-        raise RuntimeError("The server is busy. Please try again later.")
-    return await fut
+async def limited_concurrency(func, *args, **kwargs):
+    async with semaphore:
+        return await func(*args, **kwargs)
 
-async def queue_handler_stream(func, *args, **kwargs):
-    loop = asyncio.get_event_loop()
-    fut = loop.create_future()
-    async def task():
-        try:
-            async with semaphore:
-                fut.set_result(func(*args, **kwargs))
-        except Exception as e:
-            fut.set_exception(e)
-    try:
-        await request_queue.put(task)
-    except asyncio.QueueFull:
-        raise RuntimeError("The server is busy. Please try again later.")
-    return await fut
-
-async def request_consumer():
-    while True:
-        task = await request_queue.get()
-        try:
-            await task()
-        except Exception as e:
-            logger.error(f"The consumption request task failed: {e}")
-        request_queue.task_done()
-
-@app.before_serving
-async def startup():
-    app.add_background_task(request_consumer)
+async def limited_concurrency_stream(func, *args, **kwargs):
+    async with semaphore:
+        async for chunk in func(*args, **kwargs):
+            yield chunk
 
 async def handle_abnormal_input(request_id: str, request_model_name: str, sys_msg: str, user_msg: str, stream: bool):
     """
@@ -195,10 +148,6 @@ async def chat_completions():
     data = await request.get_json()
     logger.info(f"Request ID: {request_id} - Request parameters: {data}")
     
-    if request_queue.full():
-        logger.warning(f"Request queue full. Rejecting request {request_id}")
-        return jsonify({"error": "The server is busy. Please try again later.", "code": 503, "request_id": request_id}), 503
-    
     try:
         # Get core parameters
         request_model_name = data.get('model', model_name)  
@@ -223,15 +172,15 @@ async def chat_completions():
         if stream:
             async def sse_response():
                 try:
-                    gen = await queue_handler_stream(run_tactic_light_with_stream, 
+                    async for chunk in limited_concurrency_stream(run_tactic_light_with_stream, 
                         source_text, src_lang, tgt_lang, src_fullname, tgt_fullname,
                         model_platform, model_name, temperature, max_tokens, request_id
-                    )
-                    async for chunk in gen:
+                    ):
                         yield chunk
                 except Exception as e:
                     logger.error(f"[{request_id}] Stream error: {str(e)}")
                     yield f"data: {{\"error\": \"{str(e)}\"}}\n\n"
+                    yield "data: [DONE]\n\n"
 
             headers = {
                 'Cache-Control': 'no-cache',
@@ -243,17 +192,17 @@ async def chat_completions():
             return Response(sse_response(), content_type="text/event-stream; charset=utf-8", headers=headers)
             
         # Non-stream
-        translation = await queue_handler(run_tactic_light,
+        translation = await limited_concurrency(run_tactic_light,
             source_text, src_lang, tgt_lang, src_fullname, tgt_fullname,
             model_platform, model_name, temperature, max_tokens, request_id
         )
         response = construct_response(request_id, request_model_name, sys_msg, user_msg, translation)
         logger.info(f"Request ID: {request_id} - Response: {response}")
         return jsonify(response), 200
+        
     except Exception as e:
         logger.error(f"Request ID: {request_id} - Error: {str(e)}")
         return jsonify({"error": str(e), "request_id": request_id}), 500
     
 if __name__ == '__main__':
-    # model = model_init(model_platform, model_name, vllm_engine_args)
-    app.run(debug=False, host='0.0.0.0', port=backend_service_port)
+    app.run(debug=False, host='0.0.0.0', port=BACKEND_SERVER_PORT)
