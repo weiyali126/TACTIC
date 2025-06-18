@@ -11,8 +11,8 @@ configs = {'log_dir': 'logs'}
 setup_logger(configs)
 
 # Set Web service parameters
-frontend_service_port = 9002
 SERVICE_URL = f"http://localhost:{BACKEND_SERVER_PORT}/v1/chat/completions"
+FRONTEND_SERVER_PORT = 9002
 
 event_dict = {
     'DraftAgent': '--- DraftAgent ---\n',
@@ -493,4 +493,4 @@ with gr.Blocks(title="TACTIC Multi-Agent Translation", css=".main-center") as de
 
 if __name__ == "__main__":
     logger.info("Starting Gradio application...")
-    demo.launch(server_name="0.0.0.0", server_port=frontend_service_port)
+    demo.launch(server_name="0.0.0.0", server_port=FRONTEND_SERVER_PORT)
