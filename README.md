@@ -118,17 +118,16 @@ bash run_paper.sh
 ```sh
 bash run_server.sh
 ```
-
-2. Visit http://localhost:9002/
+2. (Optional) Shut down all services.
+```sh
+bash shutdown.sh
+```
+3. Visit http://localhost:9002/
 
 <div align="center">
   <img src="/docs/web-demo.gif" alt="web-demo" width="800">
 </div>
 
-3. Shut down all services. (Optional)
-```sh
-bash shutdown.sh
-```
 
 ## Directory Structure <a name="directory-structure"></a>
 
